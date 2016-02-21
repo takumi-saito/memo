@@ -1,0 +1,13 @@
+1.ContentResolver
+
+2.MediaScannerConnection
+MediaScannerConnection.scanFile(getActivity(),
+            new String[] { file.getAbsolutePath() }, null,
+            new OnScanCompletedListener() {
+                @Override
+                public void onScanCompleted(String path, Uri uri) {
+                    Log.v("MediaScanWork", "file " + path
+                            + " was scanned seccessfully: " + uri);
+                }
+            });
+}

@@ -1,0 +1,54 @@
+開始日 11:30〜12:00
+UI・デザイン
+
+path -> cubicTo
+・擬似曲線を描くことができる
+
+TypeEvaluetor
+
+  ArgdEvaluetor
+  ・色を指定
+
+  RectEvaluetor
+
+  PointEvaluetor
+
+パラメータ
+１：TypeEvaluetor
+２：start
+３：end
+
+11:40
+・interpolator
+拡大縮小のアニメーションを付与
+interpolatorに試用する数式は
+Macプリインストールアプリのgrapherを使う
+
+円を縦横膨らむアニメーションについて
+縦 加算 → 横 減算 の繰り返し
+
+Api19以上
+path -> op
+１：path
+２：↓
+  DEFFERENCE
+  REVERCE_DEFFERENCE
+  INTEROTE
+  UNION
+  XOR
+
+
+
+coloringloadind
+textmorohingciew
+・線一本で描画できるアニメーション
+一本の線に８箇所のアンカーポイントを用い
+それぞれに擬似曲線を当てる
+
+extendscript toolkit
+
+↓ソースのリンク
+TextMorphingView : https://twitter.com/amyu_san/status/654555982958166016
+WaveSwipeRefreshLayout : https://github.com/recruit-lifestyle/WaveSwipeRefreshLayout
+BeerSwipeRefreshLayout : https://github.com/recruit-lifestyle/BeerSwipeRefresh
+ColoringLoading : https://github.com/recruit-lifestyle/ColoringLoading

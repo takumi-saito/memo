@@ -1,0 +1,77 @@
+開始日 16:30〜17:00
+開発環境・ツール
+
+・gradleとは
+  ビルドツール
+  継続的に自動化
+
+スクリプトファイル
+  init.gradle
+    A：なし
+
+
+  setting.gradle
+  build.gradle
+
+プロパティファイル
+  gradle.properties
+   A：デフォルトでは：空っぽ
+   deamonで起動の指定
+   メモリサイズの指定
+   java memory size
+   などなど。。
+
+リリース
+releaseConfig
+パスワード等、外出ししたい内容は
+  環境変数
+または
+  別ファイルから参照
+
+  buildType
+    環境ごとに分けれる（フロントの向き先）、本番、dev
+    productFlavorは別々の名前に
+  productFlavor
+    リリース用
+    デバッグ用
+
+・BAZELの構成
+  workspace
+    workspace指定したところが、トップディレクトリ
+  build
+    ソースコードの配置や、プロジェクトの依存関係
+    ライブラリの依存
+
+    main_classを指定
+    name：ビルド対象の名前
+    src：クラスファイルの実態
+
+
+
+  androidの場合は
+  android sdkのpathを指定
+
+
+
+
+
+
+・ビルドについて
+  プラグインは言語ごとに設定する必要がある
+
+・とりあえず
+  常にライブラリの最新を見に行っている
+    Gradle → offline Work → チェック入れる
+
+
+・buildType
+
+
+
+AndroidStudioで使われているビルドシステムgradle
+デフォルトのまま使っているけど本当はビルド時もっと色々gradleにいい感じにやってもらいたい！
+と思っている方のためのセッションです
+
+本セッションではgradleを使いこなしビルドからデバッグ用、
+本番用apkの作成、署名や新ビルドシステムとして注目されてるBazelで
+実際にビルドを行ってみた感想についてお話しさせていただく予定です

@@ -1,0 +1,115 @@
+playpassメディアを別な所に退避、再ダウンロード。
+メディアスキャンで取ってきた情報はカタカナ、Webから取ってきた情報は英語
+
+1.アラカルトから取ってきた情報の格納方法
+関連するクラス
+
+・AlacarteRightsFragment
+  アラカルトダウンロード画面
+distinctListはダウンロードしたい楽曲リスト
+mDownloadService.setDownloadContents(distinctList);
+
+updateList：更新処理（ページ開いたとき、更新ボタン押下時）
+  getRightsWithMixMediaCursor
+    rightテーブルとMusicsテーブルのtrackIdで外部結合
+    ライブラリに該当楽曲があるかチェック
+
+・AlacarteDB
+  updateRights
+    rightテーブルに楽曲情報を挿入
+    dではクラウド権利一覧から最新情報が渡されることを想定しているため、全件delete->insert
+    PlayPではupdate
+
+    rightテーブルに格納されている楽曲情報はgetRightsList()により
+    rightクラスのメンバ変数に格納し他から参照させるようにしている
+
+
+
+
+・DownloadMap
+  ダウンロード状態を管理するマップ
+
+  Mapの構成
+    <trackId, Pair(DownloadStatus, File)>
+
+  Mapを作成(trackIdのみ)
+    createKey
+  ステータスと、楽曲ファイルをMapにセット
+    setDownloadState
+
+
+
+・Downloader
+  実際URLからダウンロードするクラス
+  run()->download()
+
+
+  ダウンロード完了ステータスの変える
+    SUCCESS
+    db.changeDownloadStatusByTrackID(info.mTrackID, AlacarteDB.DOWNLOAD_STATUS_ALREADY_DOWNLOAD);
+    ダウンロードサービスのonDownloadFinishにコールバック
+    mCallback.onDownloadFinish(mCurrentDownloadInfo, quality, filePath, totalBytes);
+
+    FAILD
+    db.changeDownloadStatus(info.mID, AlacarteDB.DOWNLOAD_STATUS_NOT_YET_DOWNLOAD);
+    ダウンロードサービスのonDownloadFailedにコールバック
+    mCallback.onDownloadFailed(mCurrentDownloadInfo, status, null);
+
+・DownloadExecutor
+  多分。。
+  beforeExecute->Downloader.run()
+
+・DownloaderService
+  アラカルトのダウンロード関連のサービスを制御するクラス
+  protected void onHandleIntent(Intent intent) {
+      if (intent != null) {
+          String action = intent.getAction();
+          if (ACTION_DOWNLOAD_START.equals(action)) {
+              Log.v(TAG, "download start");
+              TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+              String imei = tm.getDeviceId();
+              if (intent.hasExtra(EXTRA_MULTIPLE_DOWNLOAD_INFO)) {
+                  // 複数リクエスト
+                  List<DownloadInfo> list = mContentsList;
+                  for (Parcelable item : list) {
+                      if (mCancelFlag) {
+                          break;
+                      }
+                      if (item instanceof DownloadInfo) {
+                          MSelectionApplication app = (MSelectionApplication) getApplication();
+                          Downloader downloader = new Downloader(getApplicationContext(), app.getUserAgent(), app.getCookie(), imei, (DownloadInfo) item);
+                          downloader.setDownloadCallback(this);
+                          mExecutor.execute(downloader);
+                      }
+                  }
+              } else if (intent.hasExtra(EXTRA_DOWNLOAD_INFO)) {
+                  DownloadInfo info = (DownloadInfo) intent.getParcelableExtra(EXTRA_DOWNLOAD_INFO);
+                  // 単一リクエスト
+                  MSelectionApplication app = (MSelectionApplication) getApplication();
+                  Downloader downloader = new Downloader(getApplicationContext(), app.getUserAgent(), app.getCookie(), imei, info);
+                  downloader.setDownloadCallback(this);
+                  mExecutor.execute(downloader);
+              }
+          }
+      }
+  }
+
+  @Override
+  public void onDownloadFinish(DownloadInfo info, int quality, String path, long totalBytes) {
+      // ダウンロード状態を更新
+      DownloadMap.getInstance().setDownloadState(DownloadMap.createKeyId(String.valueOf(info.mID)), DownloadStatus.DOWNLOADED, new File(path));
+      new AlacartePreserver(getApplicationContext()).preserveItem(String.valueOf(info.mID), quality, path, totalBytes);
+      AlacarteDB.getInstance(getApplicationContext()).changeDownloadStatusByTrackID(info.mTrackID, AlacarteDB.DOWNLOAD_STATUS_ALREADY_DOWNLOAD);
+      stopForeground(true);
+      DownloadMap.getInstance().sendNotDownloadCountUpdatedBroadcast(DownloadService.this);
+      mCurrentDownloader = null;
+      Bundle params = new Bundle();
+      params.putInt("quality", quality);
+      params.putString("path", path);
+      params.putLong("totalBytes", totalBytes);
+      sendDownloadCallback(DOWNLOAD_FINISH, String.valueOf(info.mID), -1, params);
+  }
+マップのDLステータスの更新
+バンドル作成（音質、ファイルパス、サイズ）
+DOWNLOAD_FINISH の場合フラグンメントのonDownloadFinishコールバックメソッドへ
+mCallbackList.getBroadcastItem(i).onDownloadFinish(id, parameters);

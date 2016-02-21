@@ -1,0 +1,299 @@
+開始日 14:00〜14:50
+開発環境・ツール
+
+
+メルカリアプリエンジニア
+・コマンド
+  adb-peco
+    複数のandroid端末を同時につないでいるときに便利
+    コマンド実行するときにデバイスを選択できる
+
+  adb shell input text [string]
+    文字列、の他にAndroidのエンターなどのキー操作を送ることができる
+
+  adb shell dumpsys [system service]
+
+  adb shell settings list
+  端末の設定の一覧を参照できる
+
+
+・グレードル
+g aLD
+※コマンド省略可
+
+▪︎dexcount-gradle
+メソッドの数をカウント
+
+▪︎gradle-versions−plugin
+使用しているライブラリ新しくが更新されてるとバージョンを教えてくれる
+
+▪︎build−tracker−plugin
+グレードルが遅くなったときに、どこで遅延しているか解析してくれる
+
+▪︎gradle-slack−plugin
+タスクが終わったらslackに通知してくれる
+
+▪︎gradle-android-command−plugin
+詳細
+https://github.com/novoda/gradle-android-command-plugin
+
+Android Studio Pluginについて
+▪︎Android Wifi ADB
+PC端末同じネットワーク環境下にいればログなどが接続していなくとも参照できる
+
+Android idea
+
+▪︎Android-DPI-Plugin
+dpiとpx変換が一発でできる
+
+
+AdbCommander for Android
+inputTextがGUIで操作できる
+
+Genemotion Plugin
+
+
+Google Developers color scheme
+テーマを変えたい人向け
+
+androidtool-mac
+スクショ、録画が簡単に撮れる（mac向け）
+
+vysor
+端末をミラーリング
+
+▪︎Android SDK Search
+Chromeのプラグイン
+デベロッパーズサイトのリファレンスページに簡単に遷移できる
+
+DPI Calulator
+dpi px変換をサポート
+
+アプリ
+  Material Terminal
+
+materialdoc.com
+マテリアルデザイン採用するときに参考
+
+DesignOverlay
+ デザインを細かく調整、調査するときに便利
+
+gradle-android-ribbonizer−plugin
+デバッグの場合などアイコンに表示し判別可
+（リボンをつけることができる）
+
+
+
+
+
+・便利ツール
+Systrace
+ システムのパフォーマンスを見るためのツール
+ html形式で出力
+ Android System Traceで解析
+  Path
+   /sdk/Platform-tool/Systrace
+
+
+
+
+
+
+対象者：
+Android開発をする上で便利なツールやコマンド、ライブラリを知りたい人
+・ 初心者でも使えるもの多め
+・ 一部、動きを理解する上で前提知識が必要なものがあるかもしれませんが使う上では初心者でもOK
+・ ツールを使ってガシガシ開発効率上げたい中級者〜にもオススメ
+
+概要：
+近年、Android StudioやGradleの登場によって、標準の開発環境が日々向上しています。
+Android開発を効率的に行う上で欠かせないデベロッパーツールもたくさんあります。
+
+そんな開発の役立つデベロッパーツール、コマンド、ライブラリなどのナレッジを余すことなくご紹介したいと思います。
+実際にツール等を使いながら紹介する部分も用意します。(ワークショップ的に自分の手元で動かしたい人向けにも簡単なもの)
+Android SutdioやPluginだけでは物足りない！という方向けに、より深くAndroidを理解する上で役に立つものもご紹介します。
+これらを知ることで、今まで以上に開発効率の向上、Android楽しさ・奥深さを知っていただけると嬉しいです。
+
+具体的には以下の様なものを想定しています。
+* 便利なコマンド(adb,systrace。adb関連多め) ※1
+* Android Studio Plugin
+* Gradle Plugin
+* デバッグに便利なライブラリ
+* その他開発で便利なツール
+
+※ このセッションはADT(Android Developer Tools)だけに関するものではありません
+* This session is not about ADT (Android Developer Tools)
+
+※1 参考 https://github.com/operando/Android-Command-Note
+
+Android Command Note
+Logcat
+
+adb logcat -v time
+
+adb logcat -v time -b main
+
+adb logcat -v time -b system
+
+adb logcat -v time -b events
+
+adb logcat -v time -b radio
+
+adb shell logcat -b all
+
+Android 6.0〜
+
+adb shell logcat -v color
+
+log
+
+adb shell log [message]
+
+adb shell log -t [tag name] [message]
+
+adb shell log -p [log level] [message]
+
+Bugreport
+
+adb bugreport
+
+Application
+
+adb install [Apk File]
+
+adb uninstall [Package Name]
+
+pm - PackageManager
+
+adb shell pm list packages
+
+adb shell pm list packages -e
+
+adb shell pm list packages -d
+
+adb shell pm list packages -s
+
+adb shell pm list packages -3
+
+dumpsys
+
+adb shell dumpsys
+
+adb shell dumpsys -l
+
+adb shell dumpsys [system service]
+
+adb shell dumpsys service [service name]
+
+adb shell dumpsys activity activities
+
+adb shell dumpsys activity top
+画面に表示しているアクティビティ
+ アタッチしているフラグメントの情報もみれる
+
+
+adb shell dumpsys activity all
+
+adb shell dumpsys activity provider
+
+adb shell dumpsys activity provider all
+
+adb shell dumpsys gfxinfo
+
+adb shell dumpsys jobscheduler
+
+Root
+
+adb root
+
+Key Event
+
+adb shell input keyevent [event key]
+
+adb shell input keyevent KEYCODE_HOME
+
+adb shell input keyevent KEYCODE_BACK
+
+adb shell input keyevent KEYCODE_MENU
+
+Alarm
+
+adb shell dumpsys alarm
+
+System properties
+
+adb shell getprop
+
+adb shell getprop [property name]
+
+adb shell setprop [property name] [property value]
+
+Date
+
+adb shell date -s YYYYMMDD.hhmmss
+
+YYYYMMDD:年月日 hhmmss:時分秒
+
+要Root
+
+【Android】adb shell date は System User or radio Groupじゃないと反映されない
+
+Windows
+
+adb shell date -s %date:~0,4%%date:~5,2%%date:~8,2%.%time:~0,2%%time:~3,2%%time:~6,2%
+
+Linux or Mac
+
+adb shell date -s $(date +"%Y%m%d.%H%M%S")
+
+Dropbox
+
+adb shell dumpsys dropbox
+
+adb shell dumpsys dropbox --print
+
+adb shell dumpsys dropbox --file
+
+Lint
+
+lint [application directory] --html [file name].html
+
+lint [application directory] --simplehtml [file name].html
+
+Windows
+
+lint [application directory] --fullpath --quiet --html lint_%date:~0,4%%date:~5,2%%date:~8,2%-%time:~0,2%%time:~3,2%%time:~6,2%.html
+
+Linux or Mac
+
+lint [application directory] --fullpath --quiet --html lint_$(date +"%Y%m%d-%H%M%S").html
+
+Kernal
+
+adb shell dmesg
+
+adb shell cat /proc/kmsg
+
+Permission
+
+adb shell pm list permissions -d -g
+
+adb shell pm grant [permission.name] ...
+
+adb shell pm revoke [permission.name] ...
+
+Other
+
+adb shell printenv
+
+adb reboot
+
+adb shell reboot recovery
+
+adb pull [Unit Path] [Local Path]
+
+adb push [File Path] [Unit Path]
+
+adb shell input text [string]
+
+adb jdwp

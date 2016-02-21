@@ -1,0 +1,14 @@
+Atom
+便利パッケージ一覧
+
+pretty-json
+JSONを整形
+
+minimap
+右側に全体が見えるマップを表示(SublimeTextにもあるあれ)
+
+recent−files
+最近開いたディレクトリがわかる
+
+sublime-style-column-selection
+矩形選択（Command ＋ 選択）

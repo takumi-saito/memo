@@ -1,0 +1,36 @@
+ショートカットキー：「⌘ + ,」
+
+
+ADB Idea
+  adb コマンドをAndroid Studio上で打てる
+
+Android DPI Calculator
+  Tool->Android->DPI Calculator
+  hdpi→xxhdpi等の変換が楽
+
+ADB Uninstall
+  デバッグのとなりのゴミ箱のアイコンが追加される
+  押下するとか開発対象アプリがアンインストールされる
+
+CodeGlance
+  miniMapの表示
+
+Genymotion
+  Android高速エミュレータ
+
+Android Parcelable Generator
+  「⌘ + n」でParcelableを自動生成してくれる
+
+Android Drawable Importer
+AndroidStudio上から画像等のDrawbleがインポートできるようになるプラグイン
+drawble->New->Icon Pack...
+
+Dash
+「Ctrl + Shift + D」
+  Dashアプリが使える
+
+.gitignore
+  gitignoreをより便利に
+
+butterknifeライブラリ
+  compile 'com.jakewharton:butterknife:7.0.1'
