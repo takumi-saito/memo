@@ -113,3 +113,132 @@ updateList：更新処理（ページ開いたとき、更新ボタン押下時�
 バンドル作成（音質、ファイルパス、サイズ）
 DOWNLOAD_FINISH の場合フラグンメントのonDownloadFinishコールバックメソッドへ
 mCallbackList.getBroadcastItem(i).onDownloadFinish(id, parameters);
+
+
+・AlacartePreserver
+  アラカルトに保存するクラス
+  onDownloadFinish時に現象の根幹部分と思われる以下処理を通っている
+  ★preserveItem
+    ダウンロード終了後アラカルトDBの内容を、ContentValueにput
+    プレイパス詳細でDLした楽曲詩情報をContentValueにContentResolver.updateを行うデータを追加する
+
+    プレイパスが楽曲がローカルに既に
+      存在していた場合、ContentResolver.updateを行う
+      存在していない場合、ContentResolver.insertを行う
+  ★preserveArtist
+
+  ★preserveAlbum
+
+    ContentResolverを介しステータスをダウンロード済みに変更する
+
+
+  /**
+   * アラカルトDBのRightsテーブルのIDを元に情報を取得し、MixMediaDBの各テーブルに反映する。
+   *
+   * @param id RightsテーブルのID
+   * @param quality 音質
+   * @param path 音源ファイルのパス
+   * @param totalBytes 音源ファイルのサイズ
+   * @return 結果
+   * @throws NumberFormatException
+   */
+  public long preserveItem(String id, int quality, String path, long totalBytes) throws NumberFormatException {
+      Cursor cursor = null;
+      long mixmediaID = -1;
+      try {
+          cursor = AlacarteDB.getInstance(mContext).getRightsCursor(id);
+          int indexRightsOccursDate = cursor.getColumnIndex(AlacarteDB.COLUMN_RIGHTS_OCCURS_DATE);
+          int indexTrackID = cursor.getColumnIndex(AlacarteDB.COLUMN_TRACK_ID);
+          int indexTrack = cursor.getColumnIndex(AlacarteDB.COLUMN_TRACK);
+          int indexDiscNumber = cursor.getColumnIndex(AlacarteDB.COLUMN_DISC_NUMBER);
+          int indexTrackNumber = cursor.getColumnIndex(AlacarteDB.COLUMN_TRACK_NUMBER);
+          int indexHighDuration = cursor.getColumnIndex(AlacarteDB.COLUMN_HIGH_DURATION);
+          int indexLowDuration = cursor.getColumnIndex(AlacarteDB.COLUMN_LOW_DURATION);
+          int indexArtist = cursor.getColumnIndex(AlacarteDB.COLUMN_ARTIST);
+          int indexAlbum = cursor.getColumnIndex(AlacarteDB.COLUMN_ALBUM);
+          int indexAlbumImage = cursor.getColumnIndex(AlacarteDB.COLUMN_ALBUM_IMAGE);
+          int indexAlbumId = cursor.getColumnIndex(AlacarteDB.COLUMN_ALBUM_ID);
+
+          if (cursor.moveToFirst()) {
+              String trackID = cursor.getString(indexTrackID);
+              String track = cursor.getString(indexTrack);
+              String rightsOccursDate = cursor.getString(indexRightsOccursDate);
+              String artist = cursor.getString(indexArtist);
+              String album = cursor.getString(indexAlbum);
+              String albumArtist = artist;
+              String albumImage = cursor.getString(indexAlbumImage);
+              String duration = (quality == Downloader.HIGH_QUALITY) ? cursor.getString(indexHighDuration) : cursor.getString(indexLowDuration);
+              //String duration = "0";
+              int discNumber = cursor.getInt(indexDiscNumber);
+              int trackNumber = cursor.getInt(indexTrackNumber);
+              String albumId = cursor.getString(indexAlbumId);
+
+              ContentValues values = new ContentValues();
+              values.put(Musics.COLUMN_MS_MEDIA_ID, trackID);
+              values.put(Musics.COLUMN_MYHITS_PRODUCT_ID, trackID);
+              values.put(Musics.COLUMN_TITLE, track);
+              values.put(Musics.COLUMN_TITLE_READING, StringConverter.toNormalizeText(track));
+              values.put(Musics.COLUMN_SORT_KEY, StringConverter.toSorterText(track));
+              long artistId = preserveArtist(artist);
+              values.put(Musics.COLUMN_ARTIST_ID, artistId);
+              values.put(Musics.COLUMN_MS_ARTIST_ID, artistId);
+              values.put(Musics.COLUMN_ARTIST, artist);
+              values.put(Musics.COLUMN_ARTIST_READING, StringConverter.toNormalizeText(artist));
+              long lAlbumId = preserveAlbum(albumId);
+              if (lAlbumId > -1){
+                  values.put(Musics.COLUMN_ALBUM_ID, lAlbumId);
+              }
+              values.put(Musics.COLUMN_MS_ALBUM_ID, albumId);
+              values.put(Musics.COLUMN_ALBUM, album);
+              values.put(Musics.COLUMN_ALBUM_READING, StringConverter.toNormalizeText(album));
+              values.put(Musics.COLUMN_DURATION, Double.valueOf(duration));     // Rightsテーブルには秒数が入っているため、ミリ秒に変換
+              values.put(Musics.COLUMN_TRACK_NUMBER, discNumber * 1000 + trackNumber);
+              values.put(Musics.COLUMN_LAST_MODIFICATION, mNowTimestamp);
+              values.put(Musics.COLUMN_IS_ALACARTE, 1);
+              values.put(Musics.COLUMN_IS_LOCAL, 0);
+              values.put(Musics.COLUMN_ALACARTE_TRACK_ID, trackID);
+              SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+              String currentDateandTime = sdf.format(new Date());
+              values.put(Musics.COLUMN_ALACARTE_RIGHTS_OCCURS_DATE, currentDateandTime);
+              values.put(Musics.COLUMN_REGIST_TIMESTAMP, System.currentTimeMillis());
+              values.put(Musics.COLUMN_CONTENT_URI, path);
+              values.put(Musics.COLUMN_LOCAL_MEDIA_HASH, HashUtil.genSha1FileHash(path));
+              values.put(Musics.COLUMN_LOCAL_MEDIA_SIZE, totalBytes);
+
+              Cursor musicCursor = mContext.getContentResolver().query(Musics.CONTENT_URI, new String[] {
+                  Musics._ID, Musics.COLUMN_IS_LOCAL }, Musics.COLUMN_MS_MEDIA_ID + " = ?", new String[] { trackID } , null);
+              if (musicCursor.moveToFirst()) {
+                boolean isLocal = musicCursor.getLong(musicCursor.getColumnIndex(Musics.COLUMN_IS_LOCAL)) == 1 ? true : false;
+                if  (!isLocal) {
+                  // TODO ↓？？？？
+                  // 存在するアラカルト楽曲がローカル楽曲ではない場合は更新する
+                    mixmediaID = musicCursor.getLong(musicCursor.getColumnIndex(Musics._ID));
+                  mResolver.update(ContentUris.withAppendedId(Musics.CONTENT_URI, mixmediaID), values, null, null);
+                }
+              } else {
+                  Uri uri = mResolver.insert(Musics.CONTENT_URI, values);
+                  mixmediaID = Long.parseLong(uri.getLastPathSegment());
+              }
+              IOUtils.closeQuietly(musicCursor);
+          }
+      } finally {
+          IOUtils.closeQuietly(cursor);
+      }
+      return mixmediaID;
+  }
+
+
+sendBroadcast()
+
+以下バンドルをブロードキャストとともに投げる
+Intent intent = new Intent("data.action.RefeshData");
+intent.putExtra(Constants.NAME_INTENT_FILTER,Constants.INTENT_FILTER_HOME_SCREEN);
+intent.putExtra(Constants.TYPE_REFESH,Constants.LIST_ADD_RECENTLY_REFESH);
+
+・RefeshDataReceiver
+受け取ったデータが「INTENT_FILTER_HOME_SCREEN」の場合
+レシーバクラス
+以下をブロードキャスト
+intentToActivity = new Intent("playpass.refesh.data.recently");
+intentToActivity.putExtra(Constants.NAME_INTENT_FILTER,nameIntentFilter);
+intentToActivity.putExtra(Constants.TYPE_REFESH,typeRefesh);
