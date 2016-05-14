@@ -49,3 +49,13 @@ git-blame プラグインを使用すると現在開いているファイルに 
   * パッケージの設定
   * キーマップ
   * スニペット (バージョン0.4.0では正しく動作しない模様) v0.6.0で同期を確認
+
+### [quick-query](https://github.com/fabianfiorotto/quick-query)
+Atom上でDBに接続し、クエリ実行することができる  
+このプラグインで対応しているDBMSは少なめ
+
+### [quick-query-sqlite](https://github.com/fabianfiorotto/quick-query-sqlite)
+quick-queryのDBMS拡張プラグイン
+
+### [format-sql](https://github.com/AbeEstrada/atom-format-sql)
+SQL文の体裁をいい感じに整えてくれる
